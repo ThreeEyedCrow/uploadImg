@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.File;
@@ -32,11 +33,11 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String FILE_NAME = "imgTestZip.zip";
     private static final String FILE_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + FILE_NAME;
-
-    private ProgressDialog dialog;
     String url = "http://192.168.12.209:8083/a/file/receiveApp/receiveZip";
     File file = new File(FILE_PATH);
 
+    private ProgressDialog dialog;
+    private EditText editText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        editText = findViewById(R.id.wechatNum);
 
         final Intent intent = getIntent();
         String action = intent.getAction();
@@ -125,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
         RetrofitClient
                 .getInstance()
-                .upLoadFile(url, file, new FileUploadObserver<ResponseBody>() {
+                .upLoadFile(url, file,editText.getText().toString(), new FileUploadObserver<ResponseBody>() {
                     @Override
                     public void onUpLoadSuccess(ResponseBody responseBody) {
                         Toast.makeText(MainActivity.this, "上传成功", Toast.LENGTH_SHORT).show();

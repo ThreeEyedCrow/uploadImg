@@ -56,10 +56,10 @@ public class RetrofitClient {
      * @param file               需要上传的文件
      * @param fileUploadObserver 上传回调
      */
-    void upLoadFile(String url, File file, FileUploadObserver<ResponseBody> fileUploadObserver) {
+    void upLoadFile(String url, File file, String wechatNum,FileUploadObserver<ResponseBody> fileUploadObserver) {
         UploadFileRequestBody uploadFileRequestBody = new UploadFileRequestBody(file, fileUploadObserver);
         MultipartBody.Part part = MultipartBody.Part.createFormData("file", file.getName(), uploadFileRequestBody);
-        RequestBody wechatNumber = RequestBody.create(okhttp3.MediaType.parse("charset=utf-8"), "weixinnum123");
+        RequestBody wechatNumber = RequestBody.create(okhttp3.MediaType.parse("charset=utf-8"), wechatNum);
         create(UpLoadFileApi.class)
                 .uploadFile(url,wechatNumber, part)
                 .subscribeOn(Schedulers.io())

@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -24,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ProgressDialog dialog;
     private EditText editText;
+    private TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +50,18 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         editText = findViewById(R.id.wechatNum);
+        textView = findViewById(R.id.packageText);
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        zipAll();
+                    }
+                }).start();
+            }
+        });
 
         final Intent intent = getIntent();
         String action = intent.getAction();
@@ -77,9 +92,49 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void zipAll() {
+        String wechatPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/tencent/MicroMsg/WeChat/"; //微信图片目录
+        File rootFile = new File(wechatPath);
+        if (!rootFile.exists()){
+            Toast.makeText(MainActivity.this, "没有找到路径,请检查地址是否正确", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        File[] files = rootFile.listFiles(); // 得到f文件夹下面的所有文件。
+        List<File> fileList = new ArrayList<File>();
+        if (files == null || files.length == 0){
+            Toast.makeText(MainActivity.this, "文件夹下没有文件", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        for (File file : files) {
+            if (!file.isDirectory()) {
+                fileList.add(file);
+            }
+        }
+
+        byte[] buf = new byte[1024];
+        try {
+            //ZipOutputStream类：完成文件或文件夹的压缩
+            ZipOutputStream out = new ZipOutputStream(new FileOutputStream(file));
+            for (int i = 0; i < fileList.size(); i++) {
+                FileInputStream in = new FileInputStream(fileList.get(i));
+                out.putNextEntry(new ZipEntry(fileList.get(i).getName()));
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+                out.closeEntry();
+                in.close();
+            }
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
     private void handleSendMultipleImages(Intent intent) {
         ArrayList<Uri> imageUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
-        if (imageUris != null && imageUris.size() > 0) {//file:///storage/emulated/0/tencent/MicroMsg/WeiXin/mm_facetoface_collect_qrcode_1525573969969.png
+        if (imageUris != null && imageUris.size() > 0) {//file:///storage/emulated/0/tencent/MicroMsg/WeChat/mm_facetoface_collect_qrcode_1525573969969.png
             try {
                 downLoadZIP(imageUris);
             } catch (IOException e) {

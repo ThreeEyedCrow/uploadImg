@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String FILE_NAME = "imgTestZip.zip";
     private static final String FILE_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + FILE_NAME;
-    String url = "http://192.168.12.209:8083/a/file/receiveApp/receiveZip";
+    String url = "http://120.79.47.183:8040/a/file/receiveApp/receiveZip";
     File file = new File(FILE_PATH);
 
     private ProgressDialog dialog;

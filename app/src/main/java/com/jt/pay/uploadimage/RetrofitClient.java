@@ -1,13 +1,13 @@
 package com.jt.pay.uploadimage;
 
+
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
-
 import java.io.File;
-
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -19,7 +19,6 @@ import retrofit2.http.Url;
 public class RetrofitClient {
     private static RetrofitClient mInstance;
     private static Retrofit retrofit;
-
 
     private RetrofitClient() {
         retrofit = new Retrofit.Builder()
@@ -60,8 +59,9 @@ public class RetrofitClient {
     void upLoadFile(String url, File file, FileUploadObserver<ResponseBody> fileUploadObserver) {
         UploadFileRequestBody uploadFileRequestBody = new UploadFileRequestBody(file, fileUploadObserver);
         MultipartBody.Part part = MultipartBody.Part.createFormData("file", file.getName(), uploadFileRequestBody);
+        RequestBody wechatNumber = RequestBody.create(okhttp3.MediaType.parse("charset=utf-8"), "weixinnum123");
         create(UpLoadFileApi.class)
-                .uploadFile(url, part)
+                .uploadFile(url,wechatNumber, part)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(fileUploadObserver);
@@ -71,7 +71,7 @@ public class RetrofitClient {
     interface UpLoadFileApi {
         @Multipart
         @POST
-        Observable<ResponseBody> uploadFile(@Url String url, @Part MultipartBody.Part file);
+        Observable<ResponseBody> uploadFile(@Url String url, @Part("description") RequestBody description, @Part MultipartBody.Part file);
     }
 
 }

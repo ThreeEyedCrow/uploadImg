@@ -2,7 +2,6 @@ package com.jt.pay.uploadimage;
 
 import java.io.File;
 import java.io.IOException;
-
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -17,7 +16,6 @@ import okio.Sink;
  */
 public class UploadFileRequestBody extends RequestBody {
 
-
     private RequestBody mRequestBody;
     private FileUploadObserver<ResponseBody> fileUploadObserver;
 
@@ -25,7 +23,6 @@ public class UploadFileRequestBody extends RequestBody {
         this.mRequestBody = RequestBody.create(MediaType.parse("application/octet-stream"), file);
         this.fileUploadObserver = fileUploadObserver;
     }
-
 
     @Override
     public MediaType contentType() {
@@ -47,7 +44,6 @@ public class UploadFileRequestBody extends RequestBody {
         //刷新
         //必须调用flush，否则最后一部分数据可能不会被写入
         bufferedSink.flush();
-
     }
 
     protected final class CountingSink extends ForwardingSink {
@@ -66,8 +62,6 @@ public class UploadFileRequestBody extends RequestBody {
             if (fileUploadObserver != null) {
                 fileUploadObserver.onProgressChange(bytesWritten, contentLength());
             }
-
         }
-
     }
 }

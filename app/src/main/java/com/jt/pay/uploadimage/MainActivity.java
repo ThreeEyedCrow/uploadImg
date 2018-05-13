@@ -11,6 +11,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,9 +30,13 @@ import okhttp3.ResponseBody;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String FILE_NAME = "imgTestZip.zip";
+    private static final String FILE_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + FILE_NAME;
+
     private ProgressDialog dialog;
-    String url = "http://192.168.191.1:8080/UploadFileServer/servlet/UploadHandleServlet";
-    File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "imgTestZip.zip");
+    String url = "http://192.168.12.209:8083/a/file/receiveApp/receiveZip";
+    File file = new File(FILE_PATH);
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,18 +76,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void handleSendMultipleImages(Intent intent) {
         ArrayList<Uri> imageUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
-        if (imageUris != null && imageUris.size() > 0) {
-//            for (int i = 0; i < imageUris.size(); i++){
-//                try {
-//                    FileInputStream fileInputStream = new FileInputStream(imageUris.get(i).getPath());
-//                    Bitmap bitmap = BitmapFactory.decodeStream(fileInputStream);
-//                } catch (FileNotFoundException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-
+        if (imageUris != null && imageUris.size() > 0) {//file:///storage/emulated/0/tencent/MicroMsg/WeiXin/mm_facetoface_collect_qrcode_1525573969969.png
             try {
-                downLoadZIP(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "imgTestZip.zip", imageUris);
+                downLoadZIP(imageUris);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -91,14 +87,15 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * 打包成zip
-     *
-     * @param tagPath   zip的输出地址
      * @param imageUris 文件的来源地址，字符串数组
      * @throws IOException
      */
-    public void downLoadZIP(String tagPath, ArrayList<Uri> imageUris) throws IOException {
+    public void downLoadZIP(ArrayList<Uri> imageUris) throws IOException {
+        if (!file.exists()){
+            file = File.createTempFile("imgTestZip", ".zip", Environment.getExternalStorageDirectory());
+        }
         //zip输出流
-        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(tagPath));
+        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(file));
         File[] files = new File[imageUris.size()];
         //按照多个文件的打包方式，一个也可以
         for (int i = 0; i < files.length; i++) {

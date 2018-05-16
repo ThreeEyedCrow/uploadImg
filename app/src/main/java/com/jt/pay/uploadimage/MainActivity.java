@@ -4,9 +4,11 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +18,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private ProgressDialog dialog;
     private EditText editText;
     private TextView textView;
+    private RelativeLayout relativeLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        relativeLayout = findViewById(R.id.container);
 
         editText = findViewById(R.id.wechatNum);
         textView = findViewById(R.id.packageText);
@@ -126,6 +132,12 @@ public class MainActivity extends AppCompatActivity {
                 in.close();
             }
             out.close();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    relativeLayout.setBackgroundColor(Color.parseColor("#ffff38"));
+                }
+            });
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -187,12 +199,14 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onUpLoadSuccess(ResponseBody responseBody) {
                         Toast.makeText(MainActivity.this, "上传成功", Toast.LENGTH_SHORT).show();
+                        relativeLayout.setBackgroundColor(Color.parseColor("#aaffff"));
                         dialog.dismiss();
                     }
 
                     @Override
                     public void onUpLoadFail(Throwable e) {
                         Toast.makeText(MainActivity.this, "上传失败" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        relativeLayout.setBackgroundColor(Color.parseColor("#ffffdd"));
                         dialog.dismiss();
                     }
 

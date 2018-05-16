@@ -6,15 +6,17 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".MainActivity"
+    android:id="@+id/container"
     tools:showIn="@layout/activity_main">
 
     <TextView
         android:id="@+id/packageText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
         android:textColor="#ffffff"
         android:layout_marginTop="20dp"
         android:layout_centerHorizontal="true"
+        android:gravity="center"
         android:text="压缩打包"
         android:background="@color/colorPrimary"/>
 

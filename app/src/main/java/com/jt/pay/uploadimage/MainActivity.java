@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void zipAll() {
         String wechatPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/tencent/MicroMsg/WeChat/"; //微信图片目录
+//        String wechatPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/tencent/MicroMsg/WeiXin/"; //微信图片目录
         File rootFile = new File(wechatPath);
         if (!rootFile.exists()){
             Toast.makeText(MainActivity.this, "没有找到路径,请检查地址是否正确", Toast.LENGTH_SHORT).show();

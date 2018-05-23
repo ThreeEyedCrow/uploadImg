@@ -19,9 +19,9 @@ public class OkHttpManager {
 //                        builder.addInterceptor(interceptor);
                     }
                     //超时时间
-                    builder.connectTimeout(15, TimeUnit.SECONDS);//15S连接超时
-                    builder.readTimeout(20, TimeUnit.SECONDS);//20s读取超时
-                    builder.writeTimeout(20, TimeUnit.SECONDS);//20s写入超时
+                    builder.connectTimeout(30, TimeUnit.SECONDS);//15S连接超时
+                    builder.readTimeout(30, TimeUnit.SECONDS);//20s读取超时
+                    builder.writeTimeout(30, TimeUnit.SECONDS);//20s写入超时
                     //错误重连
                     builder.retryOnConnectionFailure(true);
                     okHttpClient = builder.build();

@@ -9,11 +9,13 @@ import java.io.OutputStream;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import okhttp3.internal.Util;
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.ForwardingSink;
 import okio.Okio;
 import okio.Sink;
+import okio.Source;
 
 /**
  * 扩展OkHttp的请求体，实现上传时的进度提示
@@ -23,6 +25,7 @@ public class UploadFileRequestBody extends RequestBody {
     private RequestBody mRequestBody;
     private FileUploadObserver<ResponseBody> fileUploadObserver;
     private File file;
+    public static final int SEGMENT_SIZE = 512*1024; // okio.Segment.SIZE
 
     public UploadFileRequestBody(File file, FileUploadObserver<ResponseBody> fileUploadObserver) {
         this.mRequestBody = RequestBody.create(MediaType.parse("application/octet-stream"), file);
@@ -42,16 +45,26 @@ public class UploadFileRequestBody extends RequestBody {
 
     @Override
     public void writeTo(BufferedSink sink) throws IOException {
-        FileInputStream fileInputStream = new FileInputStream(file);
-        int length;
-        byte[] buffer = new byte[1024 * 1024];
-        while ((length = fileInputStream.read(buffer)) != -1) {
-            sink.write(buffer, 0, length);
+        Source source = null;
+        try {
+            source = Okio.source(file);
+            long total = 0;
+            long read;
+            while ((read = source.read(sink.buffer(), SEGMENT_SIZE)) != -1) {
+                total += read;
+                if (fileUploadObserver != null) {
+                    fileUploadObserver.onProgressChange(total, contentLength());
+                }
+                sink.flush();
+            }
+        } finally {
+            Util.closeQuietly(source);
         }
 
 
 //        CountingSink countingSink = new CountingSink(sink);
 //        BufferedSink bufferedSink = Okio.buffer(countingSink);
+//
 //        //写入
 //        mRequestBody.writeTo(bufferedSink);
 //        //刷新

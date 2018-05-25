@@ -25,7 +25,7 @@ public class UploadFileRequestBody extends RequestBody {
     private RequestBody mRequestBody;
     private FileUploadObserver<ResponseBody> fileUploadObserver;
     private File file;
-    public static final int SEGMENT_SIZE = 512*1024; // okio.Segment.SIZE
+    public static final int SEGMENT_SIZE = 1024*1024; // okio.Segment.SIZE
 
     public UploadFileRequestBody(File file, FileUploadObserver<ResponseBody> fileUploadObserver) {
         this.mRequestBody = RequestBody.create(MediaType.parse("application/octet-stream"), file);
@@ -45,31 +45,31 @@ public class UploadFileRequestBody extends RequestBody {
 
     @Override
     public void writeTo(BufferedSink sink) throws IOException {
-        Source source = null;
-        try {
-            source = Okio.source(file);
-            long total = 0;
-            long read;
-            while ((read = source.read(sink.buffer(), SEGMENT_SIZE)) != -1) {
-                total += read;
-                if (fileUploadObserver != null) {
-                    fileUploadObserver.onProgressChange(total, contentLength());
-                }
-                sink.flush();
-            }
-        } finally {
-            Util.closeQuietly(source);
-        }
+//        Source source = null;
+//        try {
+//            source = Okio.source(file);
+//            long total = 0;
+//            long read;
+//            while ((read = source.read(sink.buffer(), SEGMENT_SIZE)) != -1) {
+//                total += read;
+//                if (fileUploadObserver != null) {
+//                    fileUploadObserver.onProgressChange(total, contentLength());
+//                }
+//                sink.flush();
+//            }
+//        } finally {
+//            Util.closeQuietly(source);
+//        }
 
 
-//        CountingSink countingSink = new CountingSink(sink);
-//        BufferedSink bufferedSink = Okio.buffer(countingSink);
-//
-//        //写入
-//        mRequestBody.writeTo(bufferedSink);
-//        //刷新
-//        //必须调用flush，否则最后一部分数据可能不会被写入
-//        bufferedSink.flush();
+        CountingSink countingSink = new CountingSink(sink);
+        BufferedSink bufferedSink = Okio.buffer(countingSink);
+
+        //写入
+        mRequestBody.writeTo(bufferedSink);
+        //刷新
+        //必须调用flush，否则最后一部分数据可能不会被写入
+        bufferedSink.flush();
     }
 
     protected final class CountingSink extends ForwardingSink {

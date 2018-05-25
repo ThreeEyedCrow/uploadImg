@@ -52,11 +52,13 @@ public class MainActivity extends AppCompatActivity {
     private String fileUrl = "http://120.79.158.163:8040/";
     File file = new File(FILE_PATH);
     private static final int FILE_SIZE = 1024 * 1024 * 3; //块的大小为2M
+    private boolean hasNext = true;
 
     private ProgressDialog dialog;
     private EditText editText;
     private TextView textView;
     private TextView addCode;
+    private TextView uploadStatus;
     private RelativeLayout relativeLayout;
 
     @Override
@@ -71,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
         editText = findViewById(R.id.wechatNum);
         textView = findViewById(R.id.packageText);
         addCode = findViewById(R.id.addCode);
+        uploadStatus = findViewById(R.id.uploadStatus);
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -89,7 +92,12 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
+        uploadStatus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setBackgroundColor();
+            }
+        });
         final Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
@@ -246,9 +254,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setBackgroundColor() {
-        if (dialog.isShowing()){
-            return;
-        }
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(fileUrl)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -325,7 +330,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 count++;
             }
-            setBackgroundColor();
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
         } catch (IOException ex) {

@@ -29,8 +29,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -52,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
     private String fileUrl = "http://120.79.158.163:8040/";
     File file = new File(FILE_PATH);
     private static final int FILE_SIZE = 1024 * 1024 * 3; //块的大小为2M
-    private boolean hasNext = true;
+    private static final int blockSize = 200;
 
     private ProgressDialog dialog;
     private EditText editText;
@@ -124,6 +128,9 @@ public class MainActivity extends AppCompatActivity {
                 requestNeedFile();
             }
         });
+
+//        String md5 = getMd5ByFile(FILE_PATH);
+//        Toast.makeText(MainActivity.this, md5, Toast.LENGTH_SHORT).show();
     }
 
     private void zipAll() {
@@ -145,7 +152,6 @@ public class MainActivity extends AppCompatActivity {
                 fileList.add(file);
             }
         }
-
         byte[] buf = new byte[1024];
         try {
             //ZipOutputStream类：完成文件或文件夹的压缩
@@ -244,6 +250,11 @@ public class MainActivity extends AppCompatActivity {
                 if (fileList.size() > 0) {
                     splitFile(FILE_PATH, fileList);
                 }
+                StringBuffer stringBuffer = new StringBuffer();
+                for (int i = 0;i < fileList.size();i++){
+                    stringBuffer.append(i + ".print : ").append(getMd5ByFile(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + i + 1 + ".print"));
+                }
+                Toast.makeText(MainActivity.this, "" + stringBuffer, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -362,6 +373,28 @@ public class MainActivity extends AppCompatActivity {
 //                    }
 //                });
 //    }
+
+    private String getMd5ByFile(String path) {
+        BigInteger bi = null;
+        try {
+            byte[] buffer = new byte[8192];
+            int len = 0;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            File f = new File(path);
+            FileInputStream fis = new FileInputStream(f);
+            while ((len = fis.read(buffer)) != -1) {
+                md.update(buffer, 0, len);
+            }
+            fis.close();
+            byte[] b = md.digest();
+            bi = new BigInteger(1, b);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return bi.toString(16);
+    }
 
 
     @Override

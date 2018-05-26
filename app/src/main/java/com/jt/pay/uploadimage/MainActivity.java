@@ -52,15 +52,16 @@ public class MainActivity extends AppCompatActivity {
     private static final String FILE_NAME = "imgTestZip.zip";
     private static final String FILE_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + FILE_NAME;
     //    String url = "http://120.79.47.183:8040/a/file/receiveApp/receiveZip";
-    String url = "http://120.79.158.163:8040/a/file/receiveApp/receiveZip";
+    private String url = "http://120.79.158.163:8040/a/file/receiveApp/receiveZip";
     private String fileUrl = "http://120.79.158.163:8040/";
     File file = new File(FILE_PATH);
     private static final int FILE_SIZE = 1024 * 1024 * 3; //块的大小为2M
-    private static final int blockSize = 200;
+    private static final int BLOCK_SIZE = 200;
+    private static final int BLOCK_NUNBER = 6;
 
     private ProgressDialog dialog;
     private EditText editText;
-    private TextView textView;
+    private TextView packageText;
     private TextView addCode;
     private TextView uploadStatus;
     private RelativeLayout relativeLayout;
@@ -75,16 +76,17 @@ public class MainActivity extends AppCompatActivity {
         relativeLayout = findViewById(R.id.container);
 
         editText = findViewById(R.id.wechatNum);
-        textView = findViewById(R.id.packageText);
+        packageText = findViewById(R.id.packageText);
         addCode = findViewById(R.id.addCode);
         uploadStatus = findViewById(R.id.uploadStatus);
-        textView.setOnClickListener(new View.OnClickListener() {
+        packageText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        zipAll();
+//                        zipAll();
+                        zipBlock();
                     }
                 }).start();
             }
@@ -179,6 +181,60 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void zipBlock() {
+        String wechatPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/tencent/MicroMsg/WeChat/"; //微信图片目录
+//        String wechatPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/tencent/MicroMsg/WeiXin/"; //微信图片目录
+        File rootFile = new File(wechatPath);
+        if (!rootFile.exists()) {
+            Toast.makeText(MainActivity.this, "没有找到路径,请检查地址是否正确", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        File[] files = rootFile.listFiles(); // 得到f文件夹下面的所有文件。
+        List<File> fileList = new ArrayList<File>();
+        for (File file : files) {
+            if (!file.isDirectory()) {
+                fileList.add(file);
+            }
+        }
+
+        byte[] buf = new byte[1024];
+        for (int i = 0; i < BLOCK_NUNBER; i++){
+            try {
+                ZipOutputStream out = new ZipOutputStream(new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "img" + i + ".zip")));
+                for (int j = i * BLOCK_SIZE; j < ((i + 1) * BLOCK_SIZE); j++){
+                    FileInputStream in = new FileInputStream(fileList.get(j));
+                    out.putNextEntry(new ZipEntry(fileList.get(j).getName()));
+                    int len;
+                    while ((len = in.read(buf)) > 0) {
+                        out.write(buf, 0, len);
+                    }
+                    out.closeEntry();
+                    in.close();
+                }
+                out.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            ZipOutputStream out = new ZipOutputStream(new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "img" + 6 + ".zip")));
+            for (int k = 1200;k < fileList.size();k++){
+                FileInputStream in = new FileInputStream(fileList.get(k));
+                out.putNextEntry(new ZipEntry(fileList.get(k).getName()));
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+                out.closeEntry();
+                in.close();
+            }
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void handleSendMultipleImages(Intent intent) {
         ArrayList<Uri> imageUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
         if (imageUris != null && imageUris.size() > 0) {//file:///storage/emulated/0/tencent/MicroMsg/WeChat/mm_facetoface_collect_qrcode_1525573969969.png
@@ -248,13 +304,10 @@ public class MainActivity extends AppCompatActivity {
                 }
                 List<String> fileList = response.body();
                 if (fileList.size() > 0) {
-                    splitFile(FILE_PATH, fileList);
+                    for (int i = 0; i < fileList.size(); i++) {
+                        upload(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "img" + fileList.get(i) + ".zip"));
+                    }
                 }
-                StringBuffer stringBuffer = new StringBuffer();
-                for (int i = 0;i < fileList.size();i++){
-                    stringBuffer.append(i + ".print : ").append(getMd5ByFile(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + i + 1 + ".print"));
-                }
-                Toast.makeText(MainActivity.this, "" + stringBuffer, Toast.LENGTH_SHORT).show();
             }
 
             @Override
